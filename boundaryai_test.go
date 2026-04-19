@@ -536,7 +536,7 @@ func TestVersion(t *testing.T) {
 	if Version == "" {
 		t.Error("expected Version to be non-empty")
 	}
-	if Version != "0.6.0" {
-		t.Errorf("expected Version 0.6.0, got %s", Version)
+	if Version != "0.6.5" {
+		t.Errorf("expected Version 0.6.5, got %s", Version)
 	}
 }

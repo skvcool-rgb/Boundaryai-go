@@ -24,7 +24,7 @@ import (
 	"time"
 )
 
-const Version = "0.6.0"
+const Version = "0.7.0"
 const maxRetries = 3
 const baseDelay = 100 * time.Millisecond
 
