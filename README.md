@@ -1,71 +1,77 @@
-# BoundaryAI — Go SDK
+# BoundaryAI Go SDK
 
-Go client for the **BoundaryAI** universal AI firewall — deterministic action-level enforcement for AI agents, LLM tool calls, and system commands.
+[![Go Reference](https://pkg.go.dev/badge/github.com/skvcool-rgb/Boundaryai-go.svg)](https://pkg.go.dev/github.com/skvcool-rgb/Boundaryai-go)
 
-Patent Pending US #64/029,125
+Universal AI Firewall SDK for Go — drop-in middleware that prevents PII,
+credentials, and sensitive data from leaking through any AI tool call.
+
+**Current version: v0.7.20** (synced with engine + Python/Rust/Node SDKs on 2026-04-23)
+
+---
 
 ## Install
 
 ```bash
-go get github.com/skvcool-rgb/Boundaryai-go@v0.6.0
+go get github.com/skvcool-rgb/Boundaryai-go
 ```
 
-## Usage
+> **Module path — future migration (tracked):** this SDK currently
+> publishes at `github.com/skvcool-rgb/Boundaryai-go` (the path you install
+> from above). An org-level rename to `github.com/boundaryai/go-sdk` is
+> planned for a future release — enterprise buyers flag personal-account
+> paths as a supply-chain signal. When the rename happens, the old path
+> will continue to redirect for at least 6 months so existing builds don't
+> break, and release notes will call out the new import path explicitly.
+> For now (v0.7.20), no import change is needed.
+>
+> No action required for current integrators.
+
+---
+
+## Quick start
 
 ```go
 package main
 
 import (
+    "context"
     "log"
-    boundaryai "github.com/skvcool-rgb/Boundaryai-go"
+
+    "github.com/skvcool-rgb/Boundaryai-go"
 )
 
 func main() {
-    client := boundaryai.NewClient("bai_xxx", "https://boundaryai-engine-248951128296.us-east1.run.app")
-
-    decision, err := client.Evaluate(boundaryai.Action{
-        Type:  "system.command",
-        Scope: "rm -rf /data",
+    client, err := boundaryai.New(boundaryai.Config{
+        APIKey:    "bai_...",
+        EngineURL: "https://boundaryai-engine-248951128296.us-east1.run.app",
     })
     if err != nil {
         log.Fatal(err)
     }
-    if decision.Blocked {
-        log.Fatalf("Action blocked: %s", decision.Reason)
+    decision, err := client.Evaluate(context.Background(), boundaryai.Action{
+        AgentID:     "my-agent",
+        Type:        "file.delete",
+        Description: "delete /tmp/foo",
+    })
+    if err != nil {
+        log.Fatal(err)
+    }
+    if decision.Block {
+        log.Fatalf("blocked: %s", decision.Reason)
     }
 }
 ```
 
-## Features
+---
 
-- Context-aware `Evaluate` + `EvaluateBatch`
-- Retry with exponential backoff (max 3 retries, 100ms base delay)
-- Fail-open / fail-closed modes
-- Built-in `ScanPII` — 7 pattern classes: SSN, credit cards (Luhn), AWS keys, OpenAI/Anthropic keys, GitHub PATs, passwords
-- `Health()` for liveness checks
-- Version constant: `boundaryai.Version`
+## Documentation
 
-## Sister SDKs
-
-| Language | Registry | Install |
-|---|---|---|
-| Python | [PyPI](https://pypi.org/project/boundaryai/0.6.0/) | `pip install boundaryai==0.6.0` |
-| Node | [npm](https://www.npmjs.com/package/boundaryai/v/0.6.0) | `npm install boundaryai@0.6.0` |
-| Rust | [crates.io](https://crates.io/crates/boundaryai/0.6.0) | `cargo add boundaryai@0.6.0` |
-| Go | this repo | `go get github.com/skvcool-rgb/Boundaryai-go@v0.6.0` |
-
-## Tests
-
-```bash
-go test -v ./...
-```
-
-22 tests pass (15 unit + 7 `ScanPII` subtests).
-
-## Engine
-
-All SDKs hit the same deterministic Rust enforcement engine on Cloud Run (rev `00049-skx`, v0.6.0, 42 policies, 28 watchlist terms, HMAC-SHA256 audit chain, Ed25519 agent identity).
+- Full Go API: https://pkg.go.dev/github.com/skvcool-rgb/Boundaryai-go
+- Python SDK: https://pypi.org/project/boundaryai/
+- Rust SDK: https://crates.io/crates/boundaryai
+- Node SDK: https://www.npmjs.com/package/boundaryai
+- Dashboard Integrations tab: https://dashboard.boundaryai.com/dashboard?tab=integrations
 
 ## License
 
-MIT
+MIT.

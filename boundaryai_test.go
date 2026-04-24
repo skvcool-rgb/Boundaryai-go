@@ -536,7 +536,10 @@ func TestVersion(t *testing.T) {
 	if Version == "" {
 		t.Error("expected Version to be non-empty")
 	}
-	if Version != "0.6.5" {
-		t.Errorf("expected Version 0.6.5, got %s", Version)
+	// Must match the Version const in boundaryai.go.
+	// Bump both in lock-step when releasing a new SDK version.
+	const expectedVersion = "0.7.0"
+	if Version != expectedVersion {
+		t.Errorf("expected Version %s, got %s", expectedVersion, Version)
 	}
 }
